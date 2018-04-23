@@ -1,0 +1,160 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui">
+    <h:head>
+        <title> Title</title>
+    </h:head>
+    <h:body>
+        <p:growl id="msg"/>
+        <p:accordionPanel id="topPanel">
+        <p:tab title="User Registration">
+        <h:form id="testForm">
+            <p:panelGrid id="GridPanel" columns="2">
+                 <f:facet name="header" >
+                    User Registration Form
+                 </f:facet>
+                <p:outputLabel value="Enter First Name"/>                               
+                <p:inputText value="#{UserRegistration.firstName}" size="50" id="fname"/>
+                <p:outputLabel value="Enter Last Name"/>                               
+                <p:inputText value="#{UserRegistration.lastName}" size="25" id="lname"/>
+                <p:outputLabel value="Enter Address"/>                               
+                <p:inputText value="#{UserRegistration.address}" size="25" id="address"/>
+                <p:outputLabel value="Enter City "/> 
+                <p:inputText value="#{UserRegistration.city}" size="25" id="city"/>
+                <p:outputLabel value="Enter State Code "/>
+                <p:autoComplete id="state" value="#{UserRegistration.state}" dropdown="true" emptyMessage="No Data" 
+                                queryDelay="1000" minQueryLength="2" completeMethod="#{UserRegistration.searchStates}"/>
+                <p:outputLabel value="Enter Zipcode "/> 
+                <p:inputText value="#{UserRegistration.zipcode}" size="25" id="zipcode"/>
+
+                <p:outputLabel value="Registration Date"/> 
+                <p:calendar id="registrationDate" value="#{UserRegistration.registrationDate}" />
+
+                <p:outputLabel value="Select Credits "/> 
+                <p:selectOneListbox id="credits" value="#{UserRegistration.credits}" style="height:75px" label="Credits" scrollHeight="75">
+                    <f:selectItems id="creditList" var="credit" value="#{UserRegistration.creditsList}" itemLabel="#{credit.label}" itemValue="#{credit.value}"/>
+                </p:selectOneListbox>
+
+                <p:outputLabel value="Payment Type"/> 
+                <p:selectOneRadio id="payment" value="#{UserRegistration.payment}">
+                    <f:selectItem itemLabel="Cash" itemValue="0"/>
+                    <f:selectItem itemLabel="Credit" itemValue="1"/>
+                    <f:selectItem itemLabel="Debit" itemValue="2"/>
+                </p:selectOneRadio>
+
+                <p:outputLabel value="Select Subject(s) "/> 
+                <p:selectCheckboxMenu id="subject" value="#{UserRegistration.subjects}" style="height:25px" label="Subjects" filter="true" filterMatchMode="startsWith">
+                    <f:selectItems id="courses" value="#{UserRegistration.courses}"/>
+                </p:selectCheckboxMenu>
+                
+                <p:outputLabel value="Enter Credit Card"/>
+                <p:password id="creditCard" value="#{UserRegistration.creditCard}" maxlength="25"/>
+                
+                <p:outputLabel value="Current GPA"/>
+                <p:spinner id="gpa" min="2.0" max="4.0" stepFactor="0.25" value="#{UserRegistration.GPA}"/>
+                
+                <p:outputLabel value="Rate your experience"/>
+                <p:rating id="experience" stars="5" />
+                
+                <p:outputLabel value="Enter Comments "/> 
+                <p:inputTextarea rows="5" cols="50" id="comments" value="#{UserRegistration.comments}"/>
+                
+                <p:outputLabel value="Number of Credits Registered"/>
+                <p:slider id="registeredCredits" minValue="3" maxValue="12" step="3" for="creditVal"/>
+                <p:inputText id="creditVal" maxlength="5" value="#{UserRegistration.creditHours}"/>
+                
+            </p:panelGrid>
+        <p:panelGrid columns="1">
+            <p:commandButton value="Save" image="ui-icon-check" ajax="false" actionListener="#{UserRegistration.registerUser()}"/>
+            <p:commandButton value="AJAXSave" image="ui-icon-check" ajax="true" actionListener="#{UserRegistration.registerUser()}" process="@form" update=":topPanel:testForm:dataTable"/>
+        </p:panelGrid>
+
+            <p:panel id="dataPanel" header="List of Users" closable="false" toggleable="true">
+            <p:dataTable id="dataTable" editable="false" var="user" paginator="true" rows="5" selectionMode="single"
+                         value="#{UserRegistration.dataModel}" rowKey="#{user.id}">
+                
+        <f:facet name="header">  
+            List of Users  
+        </f:facet>  
+                <p:ajax listener="#{UserRegistration.processUserSelection}" event="rowSelect" update=":topPanel:testForm"/>
+                <p:ajax listener="#{UserRegistration.processUserUnselection}" event="rowUnselect" update=":topPanel:testForm"/>
+            <p:column sortBy="id" headerText ="ID">
+                <h:outputText value="#{user.id}" />
+            </p:column>
+
+            <p:column sortBy="firstName" headerText="FirstName">  
+            <h:outputText value="#{user.firstName}" />  
+            </p:column>  
+  
+            <p:column sortBy="lastName" headerText="LastName">  
+            <h:outputText value="#{user.lastName}" />  
+            </p:column>  
+  
+            <p:column sortBy="address" headerText="Address" >  
+            <h:outputText value="#{user.address}" />  
+            </p:column>  
+  
+            <p:column sortBy="city" headerText="City">  
+                <h:outputText value="#{user.city}" />  
+            </p:column>  
+
+           <p:column sortBy="zipcode" headerText="Zipcode">  
+            <h:outputText value="#{user.zipcode}" />  
+           </p:column>  
+                
+            </p:dataTable>
+        </p:panel>
+
+        </h:form>
+        </p:tab>
+            <p:tab title="Export User Registrations">
+                <h:form id="exportForm">
+                <p:panelGrid columns="2">
+                    <p:panel header="Export All Data">
+                        <h:commandLink>  
+                            <p:graphicImage value="/images/excel.png" />  
+                            <p:dataExporter type="xls" target=":topPanel:testForm:dataTable" fileName="users" />  
+                        </h:commandLink> 
+                        <h:commandLink>  
+                            <p:graphicImage value="/images/xml.png" />  
+                            <p:dataExporter type="xml" target=":topPanel:testForm:dataTable" fileName="users" />  
+                        </h:commandLink>                        
+                        <h:commandLink>  
+                            <p:graphicImage value="/images/csv.png" />  
+                            <p:dataExporter type="csv" target=":topPanel:testForm:dataTable" fileName="users" />  
+                        </h:commandLink>                        
+                        <h:commandLink>  
+                            <p:graphicImage value="/images/pdf.png" />  
+                            <p:dataExporter type="pdf" target=":topPanel:testForm:dataTable" fileName="users" />  
+                        </h:commandLink>                        
+
+                    </p:panel>
+                    <p:panel header="Export Page Data">
+                        <h:commandLink>  
+                            <p:graphicImage value="/images/excel.png" />  
+                            <p:dataExporter type="xls" target=":topPanel:testForm:dataTable" fileName="users" pageOnly="true"/>  
+                        </h:commandLink>  
+                        <h:commandLink>  
+                            <p:graphicImage value="/images/xml.png" />  
+                            <p:dataExporter type="xml" target=":topPanel:testForm:dataTable" fileName="users" pageOnly="true"/>  
+                        </h:commandLink>                        
+                        <h:commandLink>  
+                            <p:graphicImage value="/images/csv.png" />  
+                            <p:dataExporter type="csv" target=":topPanel:testForm:dataTable" fileName="users" pageOnly="true"/>  
+                        </h:commandLink>                        
+                        <h:commandLink>  
+                            <p:graphicImage value="/images/pdf.png" />  
+                            <p:dataExporter type="pdf" target=":topPanel:testForm:dataTable" fileName="users" pageOnly="true"/>  
+                        </h:commandLink>                        
+                    </p:panel>
+                </p:panelGrid>
+               </h:form>
+            </p:tab>
+        </p:accordionPanel>
+    </h:body>
+</html>
+
